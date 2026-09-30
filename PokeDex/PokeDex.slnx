@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="pokedex.client/pokedex.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="PokeDex.Server/PokeDex.Server.csproj" />
+</Solution>
