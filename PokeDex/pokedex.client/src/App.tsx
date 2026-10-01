@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
+import ExportExcelButton from './components/ExportExcelButton';
 
 interface Pokemon {
     name: string;
@@ -19,11 +20,11 @@ function App() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     // Nuevos estados para los filtros
-    const [searchInput, setSearchInput] = useState<string>(''); // Lo que el usuario escribe
-    const [activeSearchTerm, setActiveSearchTerm] = useState<string>(''); // El nombre que se va a buscar
-    const [selectedType, setSelectedType] = useState<string>(''); // El tipo seleccionado
+    const [searchInput, setSearchInput] = useState<string>(''); 
+    const [activeSearchTerm, setActiveSearchTerm] = useState<string>(''); 
+    const [selectedType, setSelectedType] = useState<string>(''); 
 
-    // Este useEffect se disparará automáticamente si cambia la página, el tipo o el término de búsqueda activo
+    
     useEffect(() => {
         populatePokemonData(currentPage, activeSearchTerm, selectedType);
     }, [currentPage, activeSearchTerm, selectedType]);
@@ -39,14 +40,14 @@ function App() {
 
     // Controles de Filtros
     const handleSearch = () => {
-        setSelectedType(''); // Limpiamos el tipo si buscamos por nombre
+        setSelectedType('');
         setActiveSearchTerm(searchInput);
-        setCurrentPage(1); // Regresamos a la página 1
+        setCurrentPage(1); 
     };
 
     const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSearchInput(''); // Limpiamos la caja de texto
-        setActiveSearchTerm(''); // Limpiamos la búsqueda por nombre
+        setSearchInput(''); 
+        setActiveSearchTerm('');
         setSelectedType(e.target.value);
         setCurrentPage(1);
     };
@@ -78,6 +79,16 @@ function App() {
     } else {
         content = (
             <div className="w-full max-w-2xl mx-auto">
+
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold text-gray-700">Resultados</h3>
+                    
+                    <ExportExcelButton 
+                        pokemons={data.pokemons} 
+                        currentPage={data.currentPage} 
+                    />
+                </div>
+                
                 <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
@@ -216,13 +227,13 @@ function App() {
         }
 
         try {
-            const response = await fetch(url); // <-- Faltaba hacer el fetch
+            const response = await fetch(url); 
             
             if (response.ok) {
                 const fetchedData = await response.json();
                 setData(fetchedData);
             } else {
-                // Si la API devuelve un error (ej. 404), limpiamos la tabla
+               
                 setData({ currentPage: 1, totalPages: 1, pokemons: [] });
             }
         } catch (error) {

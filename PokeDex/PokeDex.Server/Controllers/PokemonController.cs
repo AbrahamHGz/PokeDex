@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PokeDex.Server.DTOs;
 using System.Text.Json;
+using PokeDex.Server.Services;
 
 namespace PokeDex.Server.Controllers
 {
@@ -10,8 +11,14 @@ namespace PokeDex.Server.Controllers
     [Route("api/[controller]")]
     public class PokemonController : Controller
     {
+        private readonly IExcelService excelService;
         private static readonly HttpClient httpClient = new HttpClient();
         private readonly string pokeApi = "https://pokeapi.co/api/v2/";
+
+        public PokemonController(IExcelService _excelService)
+        {
+            excelService = _excelService;
+        }
 
         //EndPoint de Listados
 
@@ -147,6 +154,26 @@ namespace PokeDex.Server.Controllers
             }
             catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
+
+        [HttpPost("export/excel")]
+        public IActionResult ExportToExcel([FromBody] List<PokemonDTO> pokemons)
+        {
+            if (pokemons == null || !pokemons.Any())
+                return BadRequest("No hay datos para exportar.");
+
+            try
+            {
+                var excelBytes = excelService.GeneratePokemonExcel(pokemons);
+                
+                // Retornamos el archivo de Excel configurado correctamente
+                return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PokemonList.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al generar el Excel: {ex.Message}");
+            }
+        }
+
 
     }
 }
