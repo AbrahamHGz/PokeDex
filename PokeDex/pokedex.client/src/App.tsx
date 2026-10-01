@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from 'react';
 import ExportExcelButton from './components/ExportExcelButton';
 import SendEmailButton from './components/SendEmailButton';
-
+import PokemonDetailModal, {type PokemonDetail } from './components/PokemonDetailModal';
 interface Pokemon {
     name: string;
     sprite: {
@@ -15,6 +15,7 @@ interface PaginatedResponse {
     pokemons: Pokemon[];
 }
 
+
 function App() {
     const [data, setData] = useState<PaginatedResponse>();
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -25,7 +26,12 @@ function App() {
     const [activeSearchTerm, setActiveSearchTerm] = useState<string>(''); 
     const [selectedType, setSelectedType] = useState<string>(''); 
 
-    
+    // Nuevos elementos para el detalle
+    const [selectedPokemon, setSelectedPokemon] = useState<PokemonDetail | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false); 
+    const [isLoadingDetail, setIsLoadingDetail] = useState<boolean>(false); 
+
+
     useEffect(() => {
         populatePokemonData(currentPage, activeSearchTerm, selectedType);
     }, [currentPage, activeSearchTerm, selectedType]);
@@ -59,6 +65,30 @@ function App() {
         setSelectedType('');
         setCurrentPage(1);
     };
+
+
+    const handleRowClick = async (pokemonName: string) => {
+        setIsDetailModalOpen(true);
+        setIsLoadingDetail(true);
+        
+        try {
+            const response = await fetch(`api/pokemon/details/${pokemonName}`);
+            if (response.ok) {
+                const data = await response.json();
+                setSelectedPokemon(data);
+            }
+        } catch (error) {
+            console.error("Error al obtener los detalles:", error);
+        } finally {
+            setIsLoadingDetail(false);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setIsDetailModalOpen(false);
+        setSelectedPokemon(null);
+    };
+
 
     let content;
     if (isLoading || !data) {
@@ -100,7 +130,7 @@ function App() {
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             {data.pokemons.map((pokemon, index) => (
-                                <tr key={pokemon.name + index} className="hover:bg-gray-50 transition-colors">
+                                <tr key={pokemon.name + index} onClick={() => handleRowClick(pokemon.name)} className="hover:bg-gray-50 cursor-pointer transition-colors">
                                     <td className="px-6 py-2 capitalize font-medium text-gray-800 align-middle">
                                         {pokemon.name}
                                     </td>
@@ -212,6 +242,13 @@ function App() {
                     {content}
                 </div>
             </div>
+
+            <PokemonDetailModal 
+                isOpen={isDetailModalOpen} 
+                isLoading={isLoadingDetail} 
+                pokemon={selectedPokemon} 
+                onClose={handleCloseModal} 
+            />
         </div>
     );
 

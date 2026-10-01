@@ -158,6 +158,47 @@ namespace PokeDex.Server.Controllers
             catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
+
+
+        [HttpGet("details/{name}")]
+        public async Task<IActionResult> GetPokemonDetail(string name)
+        {
+            try
+            {
+
+                string endPoint = $"{pokeApi}pokemon/{name.ToLower().Trim()}";
+                HttpResponseMessage response = await httpClient.GetAsync(endPoint);
+
+                if (!response.IsSuccessStatusCode)
+                    return NotFound($"No se encontro el detalle del pokemon");
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(responseBody);
+
+                var root = doc.RootElement;
+                
+
+                var pokemon = new PokemonDetailDTO
+                {
+                    Name = root.GetProperty("name").GetString(),
+                    Weight = root.GetProperty("weight").GetInt32(),
+                    Height = root.GetProperty("height").GetInt32(),
+                    BaseExperience = root.GetProperty("base_experience").GetInt32(),
+                    SpriteUrl = root.GetProperty("sprites").GetProperty("front_default").GetString()
+
+                };
+
+                return Ok(pokemon);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(500, $"Error de conexion a la API: {ex.Message}");
+            }
+        }
+
+
+
+
         [HttpPost("export/excel")]
         public IActionResult ExportToExcel([FromBody] List<PokemonDTO> pokemons)
         {
