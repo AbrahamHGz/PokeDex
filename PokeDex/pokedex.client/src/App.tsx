@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import ExportExcelButton from './components/ExportExcelButton';
+import SendEmailButton from './components/SendEmailButton';
 
 interface Pokemon {
     name: string;
@@ -83,10 +84,10 @@ function App() {
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-bold text-gray-700">Resultados</h3>
                     
-                    <ExportExcelButton 
-                        pokemons={data.pokemons} 
-                        currentPage={data.currentPage} 
-                    />
+                    <div className="flex gap-3">
+                        <SendEmailButton pokemons={data.pokemons} />
+                        <ExportExcelButton pokemons={data.pokemons} currentPage={data.currentPage} />
+                    </div>
                 </div>
                 
                 <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
