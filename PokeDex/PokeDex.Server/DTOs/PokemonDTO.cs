@@ -6,6 +6,9 @@ namespace PokeDex.Server.DTOs
     
     public class PokeApiListResponse
     {
+        [JsonPropertyName("count")]
+        public int Count {get; set;}
+
         [JsonPropertyName("results")]
         public List<PokemonResult>? Results { get; set; }
     }
@@ -30,5 +33,13 @@ namespace PokeDex.Server.DTOs
     public class SpriteDto
     {
         public string? FrontDefault { get; set; }
+    }
+
+
+    public class PokemonPaginatedResponse
+    {
+        public int CurrentPage {get; set;}
+        public int TotalPages {get; set;}
+        public List<PokemonDTO>? Pokemons {get; set;}
     }
 }
