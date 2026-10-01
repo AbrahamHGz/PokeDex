@@ -50,6 +50,12 @@ export default defineConfig({
             '^/weatherforecast': {
                 target,
                 secure: false
+            },
+            
+            // Se agrega la ruta de API para que el front-end pueda comunicarse con el backend sin problemas
+            '^/api': {
+                target,
+                secure: false
             }
         },
         port: parseInt(env.DEV_SERVER_PORT || '62346'),
