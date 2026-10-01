@@ -12,12 +12,15 @@ namespace PokeDex.Server.Controllers
     public class PokemonController : Controller
     {
         private readonly IExcelService excelService;
+        private readonly IEmailService emailService;
+
         private static readonly HttpClient httpClient = new HttpClient();
         private readonly string pokeApi = "https://pokeapi.co/api/v2/";
 
-        public PokemonController(IExcelService _excelService)
+        public PokemonController(IExcelService _excelService, IEmailService _emailService)
         {
             excelService = _excelService;
+            emailService = _emailService;
         }
 
         //EndPoint de Listados
@@ -174,6 +177,25 @@ namespace PokeDex.Server.Controllers
             }
         }
 
+        [HttpPost("export/email")]
+        public async Task<IActionResult> ExportToEmail([FromBody] EmailRequestDTO request)
+        {
+            if (request.Pokemons == null || !request.Pokemons.Any())
+                return BadRequest("No hay Pokémon para enviar.");
+                
+            if (string.IsNullOrWhiteSpace(request.CorreosDestino))
+                return BadRequest("Debes proporcionar al menos un correo de destino.");
+
+            try
+            {
+                await emailService.EnviarPokemonsPorCorreoAsync(request.CorreosDestino, request.Pokemons);
+                return Ok(new { message = "Correos enviados exitosamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al enviar el correo: {ex.Message}");
+            }
+        }
 
     }
 }

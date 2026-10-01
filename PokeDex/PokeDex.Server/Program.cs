@@ -9,6 +9,7 @@ namespace PokeDex.Server
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddScoped<PokeDex.Server.Services.IExcelService, PokeDex.Server.Services.ExcelService>();
+            builder.Services.AddScoped<PokeDex.Server.Services.IEmailService, PokeDex.Server.Services.EmailService>();
 
             var app = builder.Build();
 
