@@ -8,49 +8,90 @@ interface Pokemon {
     }
 }
 
-
+interface PaginatedResponse {
+    currentPages: number;
+    totalPages: number;
+    pokemons: Pokemon[];
+}
 
 function App() {
-
-    const [pokemons, setPokemons] = useState<Pokemon[]>();
+    const [data, setData] = useState<PaginatedResponse>();
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+   
 
 
     useEffect(() => {
-        populatePokemonData();
-    }, []);
+        populatePokemonData(currentPage);
+    }, [currentPage]);
 
+    const irPaginaSiguiente = () => {
+        if(data && currentPage < data.totalPages){
+            setCurrentPage(currentPage + 1);
+        }
+    };
 
+    const irPaginaAnterior = () => {
+        if(currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
 
-    const content = pokemons === undefined
-        ? <p><em>Cargando Pokemons...</em></p>
-        : <table className="table table-striped border rounded-sm" aria-labelledby="tableLabel">
-            <thead>
-                <tr  className='text-2xl'>
-                    <th>Pokémon</th>
-                    <th>Sprite</th>
-                </tr>
-            </thead>
-            <tbody>
+    let content;
+    if (isLoading || !data) {
+        content = <p><em>Cargando Pokémon...</em></p>;
+    } else {
+        content = (
+<>
+                <table className="table table-striped border" aria-labelledby="tableLabel">
+                    <thead>
+                        <tr>
+                            <th>Pokémon</th>
+                            <th>Sprite</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data.pokemons.map(pokemon =>
+                            <tr key={pokemon.name}>
+                                <td style={{ verticalAlign: 'middle', textTransform: 'capitalize' }}>
+                                    {pokemon.name}
+                                </td>
+                                <td>
+                                    <img 
+                                        src={pokemon.sprite.frontDefault} 
+                                        alt={`Sprite de ${pokemon.name}`} 
+                                        width="96" 
+                                        height="96" 
+                                    />
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
                 
-                {pokemons.map(pokemon =>
-                    <tr key={pokemon.name}>
-                       
-                        <td style={{ verticalAlign: 'middle', textTransform: 'capitalize' }}>
-                            {pokemon.name}
-                        </td>
-                        <td>
-                            {/* 2. Usamos una etiqueta <img> para mostrar la URL */}
-                            <img 
-                                src={pokemon.sprite.frontDefault} 
-                                alt={`Sprite de ${pokemon.name}`} 
-                                width="96" 
-                                height="96" 
-                            />
-                        </td>
-                    </tr>
-                )}
-            </tbody>
-         </table>; 
+                {/* Controles de Paginación Manuales */}
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                    <button 
+                        className="btn btn-primary" 
+                        onClick={irPaginaAnterior} 
+                        disabled={currentPage === 1}>
+                        Anterior
+                    </button>
+                    
+                    <span className="fw-bold">
+                        Página {data.currentPages} de {data.totalPages}
+                    </span>
+                    
+                    <button 
+                        className="btn btn-primary" 
+                        onClick={irPaginaSiguiente} 
+                        disabled={currentPage === data.totalPages}>
+                        Siguiente
+                    </button>
+                </div>
+            </>
+         );
+        }
 
     return (
         <div className=''>
@@ -64,14 +105,16 @@ function App() {
         </div>
     );
 
-    async function populatePokemonData(){
-        const response = await fetch('api/pokemon');
+    async function populatePokemonData(pageNumber: number){
+        setIsLoading(true); // Carga de pantalla
+        const response = await fetch(`api/pokemon?page=${pageNumber}`);
 
         if(response.ok){
             const data = await response.json();
-            setPokemons(data);
+            setData(data);
         }
-
+        
+        setIsLoading(false);
     }
 }
 
